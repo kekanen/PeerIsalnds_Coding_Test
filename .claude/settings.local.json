@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(PYTHONUTF8=1 PYTHONIOENCODING=utf-8 uv run python cli.py convert https://github.com/codejsha/spring-rest-sakila --output ./output -v)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(cmd.exe /c \"where node\")",
+      "Bash(cmd.exe /c \"where npm\")",
+      "Bash(py --version)",
+      "Bash(pip show chromadb)",
+      "Bash(pip show langchain)",
+      "Bash(uv run python cli.py convert https://github.com/codejsha/spring-rest-sakila --output ./output --verbose)"
+    ]
+  }
+}

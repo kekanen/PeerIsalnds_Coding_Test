@@ -1,0 +1,810 @@
+{
+  "projectOverview": {
+    "name": "App",
+    "domain": "Responsible for user authentication and authorization.",
+    "sourceRepository": "https://github.com/codejsha/spring-rest-sakila",
+    "targetFramework": "Node.js / TypeScript / Express / TypeORM",
+    "architecturePattern": "Clean Architecture",
+    "boundedContexts": 8,
+    "totalEntities": 3,
+    "totalUseCases": 30,
+    "totalBusinessRules": 17,
+    "totalApiEndpoints": 12
+  },
+  "boundedContexts": [
+    {
+      "name": "Authentication",
+      "purpose": "Responsible for user authentication and authorization.",
+      "entities": [
+        "AuthorityEntity"
+      ],
+      "dependencies": [
+        "User login and authentication",
+        "Role management",
+        "Security services"
+      ]
+    },
+    {
+      "name": "Catalog Management",
+      "purpose": "Handles the management of films, actors, categories, and related entities.",
+      "entities": [
+        "FilmEntity",
+        "ActorEntity",
+        "CategoryEntity"
+      ],
+      "dependencies": [
+        "Managing film and actor details",
+        "Category management",
+        "Film-related queries and operations"
+      ]
+    },
+    {
+      "name": "Customer Management",
+      "purpose": "Manages customer-related operations and data.",
+      "entities": [
+        "CustomerEntity"
+      ],
+      "dependencies": [
+        "Customer data management",
+        "Customer queries and responses"
+      ]
+    },
+    {
+      "name": "Location Management",
+      "purpose": "Responsible for managing geographical and location-related data.",
+      "entities": [
+        "AddressEntity",
+        "CityEntity",
+        "CountryEntity"
+      ],
+      "dependencies": [
+        "Managing addresses, cities, and countries",
+        "Location-related queries"
+      ]
+    },
+    {
+      "name": "Payment Processing",
+      "purpose": "Handles payment transactions and related operations.",
+      "entities": [
+        "PaymentEntity"
+      ],
+      "dependencies": [
+        "Processing payments",
+        "Managing payment records"
+      ]
+    },
+    {
+      "name": "Rental Management",
+      "purpose": "Manages rental transactions and related entities.",
+      "entities": [
+        "RentalEntity"
+      ],
+      "dependencies": [
+        "Managing rental transactions",
+        "Tracking rental statuses"
+      ]
+    },
+    {
+      "name": "Staff Management",
+      "purpose": "Handles staff-related operations and data.",
+      "entities": [
+        "StaffEntity"
+      ],
+      "dependencies": [
+        "Managing staff details",
+        "Staff-related queries and operations"
+      ]
+    },
+    {
+      "name": "Store Management",
+      "purpose": "Responsible for managing store inventory and sales.",
+      "entities": [
+        "StoreEntity",
+        "InventoryEntity"
+      ],
+      "dependencies": [
+        "Managing store inventory",
+        "Sales reporting and analytics"
+      ]
+    }
+  ],
+  "businessRules": [
+    {
+      "name": "Film ID must not be null",
+      "description": "Ensures that every inventory record is associated with a valid film.",
+      "sourceMethod": "InventoryEntity",
+      "conditions": [],
+      "actions": [
+        "@NotNull"
+      ],
+      "exceptions": []
+    },
+    {
+      "name": "Store ID must not be null",
+      "description": "Ensures that every inventory record is associated with a valid store.",
+      "sourceMethod": "InventoryEntity",
+      "conditions": [],
+      "actions": [
+        "@NotNull"
+      ],
+      "exceptions": []
+    },
+    {
+      "name": "Last update timestamp must not be null",
+      "description": "Ensures that every record has a last update timestamp for tracking changes.",
+      "sourceMethod": "InventoryEntity, StoreEntity, StaffEntity, RentalEntity, PaymentEntity, AddressEntity, CityEntity, CountryEntity, LanguageEntity, CustomerEntity, ActorEntity, FilmEntity, FilmCategoryEntity, FilmActorEntity",
+      "conditions": [],
+      "actions": [
+        "@NotNull"
+      ],
+      "exceptions": []
+    },
+    {
+      "name": "Username size constraint",
+      "description": "Ensures that the username is between 1 and 16 characters.",
+      "sourceMethod": "StaffEntity",
+      "conditions": [],
+      "actions": [
+        "@Size(min = 1, max = 16)"
+      ],
+      "exceptions": []
+    },
+    {
+      "name": "Address must not be null and must have valid size",
+      "description": "Ensures that the address is provided and within the specified size limits.",
+      "sourceMethod": "AddressEntity",
+      "conditions": [],
+      "actions": [
+        "@NotNull @Size(min = 1, max = 50)"
+      ],
+      "exceptions": []
+    },
+    {
+      "name": "District must not be null and must have valid size",
+      "description": "Ensures that the district is provided and within the specified size limits.",
+      "sourceMethod": "AddressEntity",
+      "conditions": [],
+      "actions": [
+        "@NotNull @Size(min = 1, max = 20)"
+      ],
+      "exceptions": []
+    },
+    {
+      "name": "Phone must not be null and must have valid size",
+      "description": "Ensures that the phone number is provided and within the specified size limits.",
+      "sourceMethod": "AddressEntity",
+      "conditions": [],
+      "actions": [
+        "@NotNull @Size(min = 1, max = 20)"
+      ],
+      "exceptions": []
+    },
+    {
+      "name": "Email must be valid and not null",
+      "description": "Ensures that the email is valid and provided for user authentication.",
+      "sourceMethod": "AuthorityEntity, Login",
+      "conditions": [],
+      "actions": [
+        "@Email @NotNull @Size(min = 1, max = 50)"
+      ],
+      "exceptions": []
+    },
+    {
+      "name": "Transaction boundaries for read operations",
+      "description": "Read operations are executed in a read-only transaction to prevent data modification.",
+      "sourceMethod": "All read operations in services",
+      "conditions": [],
+      "actions": [
+        "@Transactional(readOnly = true)"
+      ],
+      "exceptions": []
+    },
+    {
+      "name": "Transaction boundaries for write operations",
+      "description": "Write operations are executed in a transactional context to ensure data integrity.",
+      "sourceMethod": "All write operations in services",
+      "conditions": [],
+      "actions": [
+        "@Transactional"
+      ],
+      "exceptions": []
+    },
+    {
+      "name": "Active status must be true for customers and staff",
+      "description": "Ensures that only active customers and staff can perform certain operations.",
+      "sourceMethod": "CustomerEntity, StaffEntity",
+      "conditions": [],
+      "actions": [
+        "@NotNull"
+      ],
+      "exceptions": []
+    },
+    {
+      "name": "Authority ID must not be null",
+      "description": "Ensures that every staff and customer is assigned a valid authority.",
+      "sourceMethod": "StaffEntity, CustomerEntity",
+      "conditions": [],
+      "actions": [
+        "@NotNull"
+      ],
+      "exceptions": []
+    },
+    {
+      "name": "Rental duration must be specified",
+      "description": "Ensures that every film has a defined rental duration.",
+      "sourceMethod": "FilmEntity",
+      "conditions": [],
+      "actions": [
+        "@NotNull"
+      ],
+      "exceptions": []
+    },
+    {
+      "name": "Rental rate must be specified",
+      "description": "Ensures that every film has a defined rental rate.",
+      "sourceMethod": "FilmEntity",
+      "conditions": [],
+      "actions": [
+        "@NotNull"
+      ],
+      "exceptions": []
+    },
+    {
+      "name": "Replacement cost must be specified",
+      "description": "Ensures that every film has a defined replacement cost.",
+      "sourceMethod": "FilmEntity",
+      "conditions": [],
+      "actions": [
+        "@NotNull"
+      ],
+      "exceptions": []
+    },
+    {
+      "name": "Film title must not be null and must have valid size",
+      "description": "Ensures that every film has a title that is provided and within the specified size limits.",
+      "sourceMethod": "FilmEntity, FilmTextEntity",
+      "conditions": [],
+      "actions": [
+        "@NotNull @Size(min = 1, max = 128)"
+      ],
+      "exceptions": []
+    },
+    {
+      "name": "Film description must have valid size",
+      "description": "Ensures that the film description is within the specified size limits.",
+      "sourceMethod": "FilmEntity, FilmTextEntity",
+      "conditions": [],
+      "actions": [
+        "@Size(max = 65535)"
+      ],
+      "exceptions": []
+    }
+  ],
+  "modules": [
+    {
+      "name": "Customer",
+      "type": "aggregate_root",
+      "description": "Domain entity for Customer management",
+      "properties": [
+        {
+          "name": "customerId",
+          "type": "number",
+          "constraints": "primary key, auto-increment"
+        },
+        {
+          "name": "storeId",
+          "type": "number",
+          "constraints": "not null, FK to store"
+        },
+        {
+          "name": "firstName",
+          "type": "string",
+          "constraints": "not null, max 45"
+        },
+        {
+          "name": "lastName",
+          "type": "string",
+          "constraints": "not null, max 45"
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "constraints": "optional, max 50"
+        },
+        {
+          "name": "addressId",
+          "type": "number",
+          "constraints": "not null, FK to address"
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "constraints": "not null, default true"
+        },
+        {
+          "name": "createDate",
+          "type": "Date",
+          "constraints": "not null"
+        },
+        {
+          "name": "lastUpdate",
+          "type": "Date",
+          "constraints": "auto-updated"
+        }
+      ],
+      "businessRules": [
+        "Only active customers may rent DVDs",
+        "Email must be unique across all customers",
+        "Customer must belong to exactly one store"
+      ],
+      "relationships": [
+        {
+          "target": "Store",
+          "type": "ManyToOne",
+          "cardinality": "N:1"
+        },
+        {
+          "target": "Address",
+          "type": "ManyToOne",
+          "cardinality": "N:1"
+        },
+        {
+          "target": "Rental",
+          "type": "OneToMany",
+          "cardinality": "1:N"
+        },
+        {
+          "target": "Payment",
+          "type": "OneToMany",
+          "cardinality": "1:N"
+        }
+      ],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/customers",
+          "operation": "Manage Customer List",
+          "description": "Get list of all customers with optional filtering"
+        },
+        {
+          "method": "GET",
+          "path": "/customers/{customerId}",
+          "operation": "Get Customer Details",
+          "description": "Get a single customer by ID"
+        },
+        {
+          "method": "POST",
+          "path": "/customers",
+          "operation": "Add New Customer",
+          "description": "Add a new customer"
+        },
+        {
+          "method": "PUT",
+          "path": "/customers/{customerId}",
+          "operation": "Update Customer Information",
+          "description": "Update customer information"
+        },
+        {
+          "method": "DELETE",
+          "path": "/customers/{customerId}",
+          "operation": "Delete Customer",
+          "description": "Delete a customer (soft delete by setting active=false)"
+        }
+      ],
+      "useCases": [
+        {
+          "name": "Manage Rental List",
+          "description": "As a staff member, I want to manage the list of rentals so that I can track customer rentals.",
+          "actors": [
+            "Staff Member"
+          ],
+          "steps": [
+            "User requests the list of rentals",
+            "System retrieves the list of rentals",
+            "System displays the list to the user"
+          ]
+        },
+        {
+          "name": "Rent DVD",
+          "description": "As a customer, I want to rent a DVD so that I can enjoy watching it.",
+          "actors": [
+            "Customer",
+            "Staff Member"
+          ],
+          "steps": [
+            "Customer selects a DVD to rent",
+            "Staff member processes the rental",
+            "System records the rental transaction"
+          ]
+        },
+        {
+          "name": "Return DVD",
+          "description": "As a customer, I want to return a DVD so that I can complete my rental transaction.",
+          "actors": [
+            "Customer",
+            "Staff Member"
+          ],
+          "steps": [
+            "Customer returns the DVD",
+            "Staff member processes the return",
+            "System updates the rental status"
+          ]
+        },
+        {
+          "name": "Manage Payment List",
+          "description": "As a staff member, I want to manage the list of payments so that I can track customer payments.",
+          "actors": [
+            "Staff Member"
+          ],
+          "steps": [
+            "User requests the list of payments",
+            "System retrieves the list of payments",
+            "System displays the list to the user"
+          ]
+        },
+        {
+          "name": "Create Payment",
+          "description": "As a customer, I want to make a payment so that I can settle my rental transactions.",
+          "actors": [
+            "Customer",
+            "Staff Member"
+          ],
+          "steps": [
+            "Customer submits payment details",
+            "Staff member processes the payment",
+            "System records the payment transaction"
+          ]
+        },
+        {
+          "name": "Manage Customer List",
+          "description": "As a staff member, I want to manage the list of customers so that I can ensure accurate customer information.",
+          "actors": [
+            "Staff Member"
+          ],
+          "steps": [
+            "User requests the list of customers",
+            "System retrieves the list of customers",
+            "System displays the list to the user"
+          ]
+        },
+        {
+          "name": "Add New Customer",
+          "description": "As a staff member, I want to add a new customer so that I can ensure proper customer registration.",
+          "actors": [
+            "Staff Member"
+          ],
+          "steps": [
+            "User submits customer details",
+            "System validates the input",
+            "System adds the new customer to the database"
+          ]
+        },
+        {
+          "name": "Update Customer Information",
+          "description": "As a staff member, I want to update customer information so that I can keep the data accurate.",
+          "actors": [
+            "Staff Member"
+          ],
+          "steps": [
+            "User submits updated customer information",
+            "System validates the input",
+            "System updates the customer information in the database"
+          ]
+        },
+        {
+          "name": "Delete Customer",
+          "description": "As a staff member, I want to delete a customer so that I can remove outdated or incorrect entries.",
+          "actors": [
+            "Staff Member"
+          ],
+          "steps": [
+            "User requests to delete a customer",
+            "System verifies the request",
+            "System deletes the customer from the database"
+          ]
+        }
+      ],
+      "complexityEstimate": "medium",
+      "internalDependencies": [
+        "Store",
+        "Address",
+        "Rental",
+        "Payment"
+      ]
+    },
+    {
+      "name": "Rental",
+      "type": "aggregate_root",
+      "description": "Domain entity for Rental management",
+      "properties": [
+        {
+          "name": "rentalId",
+          "type": "number",
+          "constraints": "primary key, auto-increment"
+        },
+        {
+          "name": "rentalDate",
+          "type": "Date",
+          "constraints": "not null"
+        },
+        {
+          "name": "inventoryId",
+          "type": "number",
+          "constraints": "not null, FK to inventory"
+        },
+        {
+          "name": "customerId",
+          "type": "number",
+          "constraints": "not null, FK to customer"
+        },
+        {
+          "name": "returnDate",
+          "type": "Date",
+          "constraints": "nullable"
+        },
+        {
+          "name": "staffId",
+          "type": "number",
+          "constraints": "not null, FK to staff"
+        },
+        {
+          "name": "lastUpdate",
+          "type": "Date",
+          "constraints": "auto-updated"
+        }
+      ],
+      "businessRules": [
+        "Rental date must not be null",
+        "Only active customers can create rentals",
+        "Inventory item must be available (no open rental) before renting",
+        "Staff member must be from the same store as the inventory item"
+      ],
+      "relationships": [
+        {
+          "target": "Inventory",
+          "type": "ManyToOne",
+          "cardinality": "N:1"
+        },
+        {
+          "target": "Customer",
+          "type": "ManyToOne",
+          "cardinality": "N:1"
+        },
+        {
+          "target": "Staff",
+          "type": "ManyToOne",
+          "cardinality": "N:1"
+        },
+        {
+          "target": "Payment",
+          "type": "OneToMany",
+          "cardinality": "1:N"
+        }
+      ],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/rentals",
+          "operation": "Manage Rental List",
+          "description": "Get list of all rental transactions"
+        },
+        {
+          "method": "POST",
+          "path": "/rentals",
+          "operation": "Rent DVD",
+          "description": "Create a new rental (rent a DVD)"
+        },
+        {
+          "method": "PUT",
+          "path": "/rentals/{rentalId}/return",
+          "operation": "Return DVD",
+          "description": "Return a rented DVD"
+        }
+      ],
+      "useCases": [
+        {
+          "name": "Manage Rental List",
+          "description": "As a staff member, I want to manage the list of rentals so that I can track customer rentals.",
+          "actors": [
+            "Staff Member"
+          ],
+          "steps": [
+            "User requests the list of rentals",
+            "System retrieves the list of rentals",
+            "System displays the list to the user"
+          ]
+        },
+        {
+          "name": "Return DVD",
+          "description": "As a customer, I want to return a DVD so that I can complete my rental transaction.",
+          "actors": [
+            "Customer",
+            "Staff Member"
+          ],
+          "steps": [
+            "Customer returns the DVD",
+            "Staff member processes the return",
+            "System updates the rental status"
+          ]
+        },
+        {
+          "name": "Create Payment",
+          "description": "As a customer, I want to make a payment so that I can settle my rental transactions.",
+          "actors": [
+            "Customer",
+            "Staff Member"
+          ],
+          "steps": [
+            "Customer submits payment details",
+            "Staff member processes the payment",
+            "System records the payment transaction"
+          ]
+        }
+      ],
+      "complexityEstimate": "medium",
+      "internalDependencies": [
+        "Inventory",
+        "Customer",
+        "Staff",
+        "Payment"
+      ]
+    },
+    {
+      "name": "Store",
+      "type": "aggregate_root",
+      "description": "Domain entity for Store management",
+      "properties": [
+        {
+          "name": "storeId",
+          "type": "number",
+          "constraints": "primary key, auto-increment"
+        },
+        {
+          "name": "managerStaffId",
+          "type": "number",
+          "constraints": "not null, unique, FK to staff"
+        },
+        {
+          "name": "addressId",
+          "type": "number",
+          "constraints": "not null, FK to address"
+        },
+        {
+          "name": "lastUpdate",
+          "type": "Date",
+          "constraints": "auto-updated"
+        }
+      ],
+      "businessRules": [
+        "Each store must have exactly one manager",
+        "Manager must be a staff member assigned to that store",
+        "Store ID must not be null in inventory records"
+      ],
+      "relationships": [
+        {
+          "target": "Staff",
+          "type": "OneToOne",
+          "cardinality": "1:1",
+          "join": "managerStaffId"
+        },
+        {
+          "target": "Address",
+          "type": "ManyToOne",
+          "cardinality": "N:1"
+        },
+        {
+          "target": "Staff",
+          "type": "OneToMany",
+          "cardinality": "1:N"
+        },
+        {
+          "target": "Inventory",
+          "type": "OneToMany",
+          "cardinality": "1:N"
+        },
+        {
+          "target": "Customer",
+          "type": "OneToMany",
+          "cardinality": "1:N"
+        }
+      ],
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/stores",
+          "operation": "Manage Store List",
+          "description": "Get list of all stores"
+        },
+        {
+          "method": "POST",
+          "path": "/stores",
+          "operation": "Add New Store",
+          "description": "Add a new store"
+        },
+        {
+          "method": "PUT",
+          "path": "/stores/{storeId}",
+          "operation": "Update Store Information",
+          "description": "Update store information"
+        },
+        {
+          "method": "DELETE",
+          "path": "/stores/{storeId}",
+          "operation": "Delete Store",
+          "description": "Delete a store"
+        }
+      ],
+      "useCases": [
+        {
+          "name": "Report Sales by Store",
+          "description": "As a manager, I want to view sales reports by store so that I can evaluate store performance.",
+          "actors": [
+            "Manager",
+            "Sales Analyst"
+          ],
+          "steps": [
+            "User requests sales report by store",
+            "System retrieves sales data grouped by store",
+            "System returns the report to the user"
+          ]
+        },
+        {
+          "name": "Manage Store List",
+          "description": "As an administrator, I want to manage the list of stores so that I can ensure accurate store information.",
+          "actors": [
+            "Administrator"
+          ],
+          "steps": [
+            "User requests the list of stores",
+            "System retrieves the list of stores",
+            "System displays the list to the user"
+          ]
+        },
+        {
+          "name": "Add New Store",
+          "description": "As an administrator, I want to add a new store so that I can expand the business.",
+          "actors": [
+            "Administrator"
+          ],
+          "steps": [
+            "User submits store details",
+            "System validates the input",
+            "System adds the new store to the database"
+          ]
+        },
+        {
+          "name": "Update Store Information",
+          "description": "As an administrator, I want to update store information so that I can keep the data accurate.",
+          "actors": [
+            "Administrator"
+          ],
+          "steps": [
+            "User submits updated store information",
+            "System validates the input",
+            "System updates the store information in the database"
+          ]
+        },
+        {
+          "name": "Delete Store",
+          "description": "As an administrator, I want to delete a store so that I can remove outdated or incorrect entries.",
+          "actors": [
+            "Administrator"
+          ],
+          "steps": [
+            "User requests to delete a store",
+            "System verifies the request",
+            "System deletes the store from the database"
+          ]
+        }
+      ],
+      "complexityEstimate": "medium",
+      "internalDependencies": [
+        "Staff",
+        "Address",
+        "Staff",
+        "Inventory",
+        "Customer"
+      ]
+    }
+  ]
+}
